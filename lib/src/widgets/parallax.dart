@@ -9,13 +9,16 @@ class Parallax extends StatelessWidget {
   Parallax.outside({
     Key key,
     @required this.child,
-    @required this.controller,
+    @required ScrollController controller,
     this.followScrollDirection = true,
   })
       : assert(controller != null),
         assert(followScrollDirection != null),
         mainAxisExtent = null,
-        delegate = null,
+        delegate = new ParallaxLayout(
+          controller: controller,
+          followScrollDirection: followScrollDirection,
+        ),
         super(key: key);
 
   const Parallax.inside({
@@ -27,7 +30,6 @@ class Parallax extends StatelessWidget {
       : assert(mainAxisExtent != null && mainAxisExtent >= 0.0),
         assert(followScrollDirection != null),
         delegate = null,
-        controller = null,
         super(key: key);
 
   const Parallax.custom({
@@ -38,7 +40,6 @@ class Parallax extends StatelessWidget {
       : assert(delegate != null),
         mainAxisExtent = null,
         followScrollDirection = null,
-        controller = null,
         super(key: key);
 
   /// The child of this widget.
@@ -49,8 +50,6 @@ class Parallax extends StatelessWidget {
   final double mainAxisExtent;
 
   final bool followScrollDirection;
-
-  final ScrollController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -64,11 +63,6 @@ class Parallax extends StatelessWidget {
           mainAxisExtent: mainAxisExtent,
           followScrollDirection: followScrollDirection,
           controller: controller,
-        );
-      } else if (controller != null) {
-        parallaxLayoutDelegate = new ParallaxLayout(
-          controller: controller,
-          followScrollDirection: followScrollDirection,
         );
       }
     }
