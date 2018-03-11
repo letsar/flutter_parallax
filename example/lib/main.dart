@@ -26,24 +26,95 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scrollController = new ScrollController();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ListView listView = new ListView.builder(
+      controller: _scrollController,
+      itemBuilder: buildItem,
+      itemCount: 12,
+    );
+
     return new Scaffold(
-      body: new ListView.builder(
-        itemBuilder: buildItem,
-        itemCount: 12,
+      body: new Stack(
+        children: <Widget>[
+          new Parallax.outside(
+            controller: _scrollController,
+            child: new Column(
+              children: <Widget>[
+                new Container(
+                  color: Colors.red,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.pink,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.lightGreen,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.orange,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.teal,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.purple,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.grey,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.lime,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.indigo,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.yellow,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.green,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.blue,
+                  height: 200.0,
+                ),
+              ],
+            ),
+          ),
+          listView,
+        ],
       ),
     );
   }
 
   Widget buildItem(BuildContext context, int index) {
-    if (index != 6) {
-      return new Parallax(
+    if (index != 20) {
+      return new Parallax.inside(
         child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
         mainAxisExtent: 150.0,
       );
     } else {
-      return new Parallax(
+      return new Parallax.inside(
         child: new Column(
           children: <Widget>[
             new Container(
@@ -77,39 +148,5 @@ class _MyHomePageState extends State<MyHomePage> {
         followScrollDirection: true,
       );
     }
-
-//    return new Align(
-//        alignment: Alignment.topCenter,
-//        heightFactor: 0.5,
-//        child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
-//      );
-
-//    return new ClipRect(
-//      child: new Align(
-//        alignment: Alignment.topCenter,
-//        heightFactor: 0.5,
-//        child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
-//      ),
-//    );
-
-//    return new Padding(
-//      padding: const EdgeInsets.only(bottom: 8.0),
-//      child: new Parallax(
-//        child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
-//        mainAxisExtent: 150.0,
-//      ),
-//    );
-  }
-}
-
-class _Clipper extends CustomClipper<Rect> {
-  @override
-  Rect getClip(Size size) {
-    return new Rect.fromLTRB(0.0, 100.0, size.width, size.height - 100.0);
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Rect> oldClipper) {
-    return true;
   }
 }
