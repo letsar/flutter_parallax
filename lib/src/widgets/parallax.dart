@@ -11,8 +11,7 @@ class Parallax extends StatelessWidget {
     @required this.child,
     @required ScrollController controller,
     this.followScrollDirection = true,
-  })
-      : assert(controller != null),
+  })  : assert(controller != null),
         assert(followScrollDirection != null),
         mainAxisExtent = null,
         delegate = new ParallaxLayout(
@@ -26,8 +25,7 @@ class Parallax extends StatelessWidget {
     @required this.child,
     @required this.mainAxisExtent,
     this.followScrollDirection = true,
-  })
-      : assert(mainAxisExtent != null && mainAxisExtent >= 0.0),
+  })  : assert(mainAxisExtent != null && mainAxisExtent >= 0.0),
         assert(followScrollDirection != null),
         delegate = null,
         super(key: key);
@@ -36,8 +34,7 @@ class Parallax extends StatelessWidget {
     Key key,
     @required this.child,
     @required this.delegate,
-  })
-      : assert(delegate != null),
+  })  : assert(delegate != null),
         mainAxisExtent = null,
         followScrollDirection = null,
         super(key: key);
@@ -76,6 +73,187 @@ class Parallax extends StatelessWidget {
   }
 }
 
+abstract class ParallaxDelegate {
+  const ParallaxDelegate({
+    @required this.controller,
+  }) : assert(controller != null);
+
+  final ScrollController controller;
+
+  /// The size of this object given the incoming constraints.
+  ///
+  /// Defaults to the biggest size that satisfies the given constraints.
+  Size getSize(BoxConstraints constraints) => constraints.biggest;
+
+  /// The constraints for the child given the incoming constraints.
+  ///
+  /// During layout, the child is given the layout constraints returned by this
+  /// function. The child is required to pick a size for itself that satisfies
+  /// these constraints.
+  ///
+  /// Defaults to the given constraints.
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints;
+
+  /// The position where the child should be placed.
+  ///
+  /// The `size` argument is the size of the parent, which might be different
+  /// from the value returned by [getSize] if that size doesn't satisfy the
+  /// constraints passed to [getSize]. The `childSize` argument is the size of
+  /// the child, which will satisfy the constraints returned by
+  /// [getConstraintsForChild].
+  ///
+  /// Defaults to positioning the child in the upper left corner of the parent.
+  Offset getPositionForChild(Size size, Size childSize, RenderBox renderBox) => Offset.zero;
+
+  /// Called whenever a new instance of the custom layout delegate class is
+  /// provided to the [RenderCustomSingleChildLayoutBox] object, or any time
+  /// that a new [CustomSingleChildLayout] object is created with a new instance
+  /// of the custom layout delegate class (which amounts to the same thing,
+  /// because the latter is implemented in terms of the former).
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If the method returns false, then the [getSize],
+  /// [getConstraintsForChild], and [getPositionForChild] calls might be
+  /// optimized away.
+  ///
+  /// It's possible that the layout methods will get called even if
+  /// [shouldRelayout] returns false (e.g. if an ancestor changed its layout).
+  /// It's also possible that the layout method will get called
+  /// without [shouldRelayout] being called at all (e.g. if the parent changes
+  /// size).
+  bool shouldRelayout(covariant ParallaxDelegate oldDelegate) {
+    return controller != oldDelegate.controller;
+  }
+}
+
+abstract class ParallaxWithAxisDirectionDelegate extends ParallaxDelegate {
+  /// Creates a parallax delegate that indicates the axis of its own scroll direction.
+  const ParallaxWithAxisDirectionDelegate({
+    @required ScrollController controller,
+    this.direction,
+  })  : assert(controller != null),
+        super(controller: controller);
+
+  /// The direction of the parallax effect when scrolling.
+  ///
+  /// When null, the direction is the same as the [controller].
+  final AxisDirection direction;
+
+  static Offset _getOffsetUnit(AxisDirection direction) {
+    switch (direction) {
+      case AxisDirection.up:
+        return const Offset(0.0, 1.0);
+      case AxisDirection.down:
+        return const Offset(0.0, -1.0);
+      case AxisDirection.left:
+        return const Offset(1.0, 0.0);
+      case AxisDirection.right:
+        return const Offset(-1.0, 0.0);
+    }
+    return null;
+  }
+
+  @override
+  bool shouldRelayout(ParallaxWithAxisDirectionDelegate oldDelegate) {
+    return super.shouldRelayout(oldDelegate) || direction != oldDelegate.direction;
+  }
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    final Axis axis = controller.position?.axis;
+    assert(axis != null);
+    return axis == Axis.horizontal ? constraints.heightConstraints() : constraints.widthConstraints();
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize, RenderBox renderBox) {
+    final ScrollPosition position = controller.position;
+    assert(position != null);
+
+    final AxisDirection parallaxDirection = direction ?? position.axisDirection;
+    assert(parallaxDirection != null);
+
+    final Offset offsetUnit = _getOffsetUnit(parallaxDirection);
+    final bool isHorizontalAxis = (position.axis == Axis.horizontal);
+
+    final double childExtent = isHorizontalAxis ? childSize.width : childSize.height;
+    final double mainAxisExtent = isHorizontalAxis ? size.width : size.height;
+
+    if (mainAxisExtent < childExtent) {
+      final double scrollRatio = getChildScrollRatio(offsetUnit, childExtent, renderBox);
+      final offset = childExtent - lerpDouble(mainAxisExtent, childExtent, scrollRatio);
+
+      return offsetUnit * offset;
+    } else {
+      return Offset.zero;
+    }
+  }
+
+  double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox);
+}
+
+class ParallaxInsideDelegate extends ParallaxWithAxisDirectionDelegate {
+  const ParallaxInsideDelegate({
+    @required ScrollController controller,
+    @required this.mainAxisExtent,
+    AxisDirection direction,
+  })  : assert(mainAxisExtent != null && mainAxisExtent >= 0.0),
+        super(
+          controller: controller,
+          direction: direction,
+        );
+
+  final double mainAxisExtent;
+
+  @override
+  double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox) {
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(renderBox);
+    assert(viewport != null);
+    final Offset localPositionOffset = offsetUnit * mainAxisExtent;
+    final Offset positionInViewport = renderBox.localToGlobal(localPositionOffset, ancestor: viewport);
+
+    // One dimension should be 0.0, so this should be ok.
+    final double distanceFromLeading = math.max(positionInViewport.dx, positionInViewport.dy);
+
+    double scrollRatio = distanceFromLeading / (controller.position.viewportDimension + mainAxisExtent);
+//    if (followScrollDirection) {
+//      scrollRatio = 1.0 - scrollRatio;
+//    }
+
+    return scrollRatio;
+  }
+}
+
+class ParallaxOutsideDelegate extends ParallaxWithAxisDirectionDelegate {
+  const ParallaxOutsideDelegate({
+    @required ScrollController controller,
+    AxisDirection direction,
+  }) : super(
+          controller: controller,
+          direction: direction,
+        );
+
+  @override
+  double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox) {
+    double scrollRatio = 0.0; //followScrollDirection ? 1.0 : 0.0;
+    final ScrollPosition position = controller.position;
+    final double offset = controller.offset;
+    final double minScrollExtent = position?.minScrollExtent ?? double.negativeInfinity;
+    final double maxScrollExtent = position?.maxScrollExtent ?? double.infinity;
+
+    if (minScrollExtent.isFinite && maxScrollExtent.isFinite) {
+      scrollRatio = (offset - minScrollExtent) / (maxScrollExtent - minScrollExtent);
+//      if (followScrollDirection) {
+//        scrollRatio = 1.0 - scrollRatio;
+//      }
+    }
+    return scrollRatio;
+  }
+}
+
 abstract class ParallaxLayoutDelegate {
   /// Creates a layout delegate.
   ///
@@ -84,8 +262,7 @@ abstract class ParallaxLayoutDelegate {
     @required this.controller,
     this.mainAxisExtent,
     this.followScrollDirection = true,
-  })
-      : assert(controller != null),
+  })  : assert(controller != null),
         assert(followScrollDirection != null);
 
   final double mainAxisExtent;
@@ -122,8 +299,7 @@ class ParallaxScrollItemLayout extends ParallaxLayoutDelegate {
     @required double mainAxisExtent,
     @required ScrollController controller,
     bool followScrollDirection = true,
-  })
-      : assert(mainAxisExtent != null && mainAxisExtent >= 0.0),
+  })  : assert(mainAxisExtent != null && mainAxisExtent >= 0.0),
         super(
           mainAxisExtent: mainAxisExtent,
           controller: controller,
@@ -154,8 +330,7 @@ class ParallaxLayout extends ParallaxLayoutDelegate {
   const ParallaxLayout({
     @required ScrollController controller,
     bool followScrollDirection = true,
-  })
-      : super(
+  }) : super(
           controller: controller,
           followScrollDirection: followScrollDirection,
         );
@@ -178,12 +353,65 @@ class ParallaxLayout extends ParallaxLayoutDelegate {
   }
 }
 
+class RenderParallax extends RenderShiftedBox {
+  RenderParallax({RenderBox child, @required ParallaxDelegate delegate})
+      : assert(delegate != null),
+        _delegate = delegate,
+        super(child);
+
+  /// A delegate that controls this object's layout.
+  ParallaxDelegate get delegate => _delegate;
+  ParallaxDelegate _delegate;
+  set delegate(ParallaxDelegate newDelegate) {
+    assert(newDelegate != null);
+    if (_delegate == newDelegate) {
+      return;
+    }
+    final ParallaxDelegate oldDelegate = _delegate;
+    if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate)) {
+      markNeedsLayout();
+    }
+    _delegate = newDelegate;
+    if (attached) {
+      oldDelegate?.controller?.removeListener(markNeedsLayout);
+      newDelegate?.controller?.addListener(markNeedsLayout);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _delegate?.controller?.addListener(markNeedsLayout);
+  }
+
+  @override
+  void detach() {
+    _delegate?.controller?.removeListener(markNeedsLayout);
+    super.detach();
+  }
+
+  Size _getSize(BoxConstraints constraints) {
+    return constraints.constrain(_delegate.getSize(constraints));
+  }
+
+  @override
+  void performLayout() {
+    size = _getSize(constraints);
+    if (child != null) {
+      final BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
+      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
+      child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
+      final BoxParentData childParentData = child.parentData;
+      childParentData.offset = delegate.getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child.size, this);
+    }
+  }
+}
+
 class RenderParallaxChildLayoutBox extends RenderShiftedBox {
   RenderParallaxChildLayoutBox({
     RenderBox child,
     @required ParallaxLayoutDelegate delegate,
-  })
-      : assert(delegate != null),
+  })  : assert(delegate != null),
         _delegate = delegate,
         super(child);
 
@@ -219,6 +447,7 @@ class RenderParallaxChildLayoutBox extends RenderShiftedBox {
     final ScrollPosition scrollPosition = _delegate?.controller?.position;
     assert(scrollPosition != null);
 
+    final AxisDirection direction = scrollPosition.axisDirection;
     final double extent = _delegate?.mainAxisExtent;
 
     final bool followScrollDirection = _delegate?.followScrollDirection;
@@ -262,8 +491,7 @@ class ParallaxSingleChildLayout extends SingleChildRenderObjectWidget {
     Key key,
     @required this.delegate,
     Widget child,
-  })
-      : assert(delegate != null),
+  })  : assert(delegate != null),
         super(key: key, child: child);
 
   /// The delegate that controls the layout of the child.

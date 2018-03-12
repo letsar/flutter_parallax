@@ -46,61 +46,61 @@ class _MyHomePageState extends State<MyHomePage> {
     return new Scaffold(
       body: new Stack(
         children: <Widget>[
-          new Parallax.outside(
-            controller: _scrollController,
-            child: new Column(
-              children: <Widget>[
-                new Container(
-                  color: Colors.red,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.pink,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.lightGreen,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.orange,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.teal,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.purple,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.grey,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.lime,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.indigo,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.yellow,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.green,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.blue,
-                  height: 200.0,
-                ),
-              ],
-            ),
-          ),
+//          new Parallax.outside(
+//            controller: _scrollController,
+//            child: new Column(
+//              children: <Widget>[
+//                new Container(
+//                  color: Colors.red,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.pink,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.lightGreen,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.orange,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.teal,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.purple,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.grey,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.lime,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.indigo,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.yellow,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.green,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.blue,
+//                  height: 200.0,
+//                ),
+//              ],
+//            ),
+//          ),
           listView,
         ],
       ),
