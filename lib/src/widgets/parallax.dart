@@ -10,13 +10,12 @@ class Parallax extends StatelessWidget {
     Key key,
     @required this.child,
     @required ScrollController controller,
-    this.followScrollDirection = true,
+    this.direction,
   })  : assert(controller != null),
-        assert(followScrollDirection != null),
         mainAxisExtent = null,
-        delegate = new ParallaxLayout(
+        delegate = new ParallaxOutsideDelegate(
           controller: controller,
-          followScrollDirection: followScrollDirection,
+            direction : direction,
         ),
         super(key: key);
 
@@ -24,9 +23,8 @@ class Parallax extends StatelessWidget {
     Key key,
     @required this.child,
     @required this.mainAxisExtent,
-    this.followScrollDirection = true,
+    this.direction,
   })  : assert(mainAxisExtent != null && mainAxisExtent >= 0.0),
-        assert(followScrollDirection != null),
         delegate = null,
         super(key: key);
 
@@ -36,37 +34,35 @@ class Parallax extends StatelessWidget {
     @required this.delegate,
   })  : assert(delegate != null),
         mainAxisExtent = null,
-        followScrollDirection = null,
+        direction = null,
         super(key: key);
 
   /// The child of this widget.
   final Widget child;
 
-  final ParallaxLayoutDelegate delegate;
+  final ParallaxDelegate delegate;
 
   final double mainAxisExtent;
 
-  final bool followScrollDirection;
+  final AxisDirection direction;
 
   @override
   Widget build(BuildContext context) {
-    ParallaxLayoutDelegate parallaxLayoutDelegate = delegate;
-    if (parallaxLayoutDelegate == null) {
-      if (mainAxisExtent != null && mainAxisExtent >= 0.0) {
+    ParallaxDelegate parallaxDelegate = delegate;
+    if (parallaxDelegate == null) {
         final ScrollPosition position = Scrollable.of(context).position;
         final ScrollController controller = new ScrollController();
         controller.attach(position);
-        parallaxLayoutDelegate = new ParallaxScrollItemLayout(
+        parallaxDelegate = new ParallaxInsideDelegate(
           mainAxisExtent: mainAxisExtent,
-          followScrollDirection: followScrollDirection,
+          direction: direction,
           controller: controller,
         );
-      }
     }
 
     return new ClipRect(
       child: new ParallaxSingleChildLayout(
-        delegate: parallaxLayoutDelegate,
+        delegate: parallaxDelegate,
         child: child,
       ),
     );
@@ -145,11 +141,9 @@ abstract class ParallaxWithAxisDirectionDelegate extends ParallaxDelegate {
   static Offset _getOffsetUnit(AxisDirection direction) {
     switch (direction) {
       case AxisDirection.up:
-        return const Offset(0.0, 1.0);
       case AxisDirection.down:
         return const Offset(0.0, -1.0);
       case AxisDirection.left:
-        return const Offset(1.0, 0.0);
       case AxisDirection.right:
         return const Offset(-1.0, 0.0);
     }
@@ -209,6 +203,15 @@ class ParallaxInsideDelegate extends ParallaxWithAxisDirectionDelegate {
   final double mainAxisExtent;
 
   @override
+  Size getSize(BoxConstraints constraints) {
+    final ScrollPosition position = controller.position;
+    assert(position != null);
+    final bool isHorizontalAxis = (position.axis == Axis.horizontal);
+
+    return constraints.constrain(new Size(isHorizontalAxis ? mainAxisExtent : constraints.maxWidth, isHorizontalAxis ? constraints.maxHeight : mainAxisExtent));
+  }
+
+  @override
   double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox) {
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(renderBox);
     assert(viewport != null);
@@ -218,7 +221,7 @@ class ParallaxInsideDelegate extends ParallaxWithAxisDirectionDelegate {
     // One dimension should be 0.0, so this should be ok.
     final double distanceFromLeading = math.max(positionInViewport.dx, positionInViewport.dy);
 
-    double scrollRatio = distanceFromLeading / (controller.position.viewportDimension + mainAxisExtent);
+    double scrollRatio = 1.0 - distanceFromLeading / (controller.position.viewportDimension + mainAxisExtent);
 //    if (followScrollDirection) {
 //      scrollRatio = 1.0 - scrollRatio;
 //    }
@@ -238,14 +241,14 @@ class ParallaxOutsideDelegate extends ParallaxWithAxisDirectionDelegate {
 
   @override
   double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox) {
-    double scrollRatio = 0.0; //followScrollDirection ? 1.0 : 0.0;
+    double scrollRatio = 1.0; //followScrollDirection ? 1.0 : 0.0;
     final ScrollPosition position = controller.position;
     final double offset = controller.offset;
     final double minScrollExtent = position?.minScrollExtent ?? double.negativeInfinity;
     final double maxScrollExtent = position?.maxScrollExtent ?? double.infinity;
 
     if (minScrollExtent.isFinite && maxScrollExtent.isFinite) {
-      scrollRatio = (offset - minScrollExtent) / (maxScrollExtent - minScrollExtent);
+      scrollRatio = 1.0 - (offset - minScrollExtent) / (maxScrollExtent - minScrollExtent);
 //      if (followScrollDirection) {
 //        scrollRatio = 1.0 - scrollRatio;
 //      }
@@ -495,15 +498,15 @@ class ParallaxSingleChildLayout extends SingleChildRenderObjectWidget {
         super(key: key, child: child);
 
   /// The delegate that controls the layout of the child.
-  final ParallaxLayoutDelegate delegate;
+  final ParallaxDelegate delegate;
 
   @override
-  RenderParallaxChildLayoutBox createRenderObject(BuildContext context) {
-    return new RenderParallaxChildLayoutBox(delegate: delegate);
+  RenderParallax createRenderObject(BuildContext context) {
+    return new RenderParallax(delegate: delegate);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderParallaxChildLayoutBox renderObject) {
+  void updateRenderObject(BuildContext context, RenderParallax renderObject) {
     renderObject.delegate = delegate;
   }
 }
