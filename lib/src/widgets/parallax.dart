@@ -15,7 +15,7 @@ class Parallax extends StatelessWidget {
         mainAxisExtent = null,
         delegate = new ParallaxOutsideDelegate(
           controller: controller,
-            direction : direction,
+          direction: direction,
         ),
         super(key: key);
 
@@ -50,14 +50,14 @@ class Parallax extends StatelessWidget {
   Widget build(BuildContext context) {
     ParallaxDelegate parallaxDelegate = delegate;
     if (parallaxDelegate == null) {
-        final ScrollPosition position = Scrollable.of(context).position;
-        final ScrollController controller = new ScrollController();
-        controller.attach(position);
-        parallaxDelegate = new ParallaxInsideDelegate(
-          mainAxisExtent: mainAxisExtent,
-          direction: direction,
-          controller: controller,
-        );
+      final ScrollPosition position = Scrollable.of(context).position;
+      final ScrollController controller = new ScrollController();
+      controller.attach(position);
+      parallaxDelegate = new ParallaxInsideDelegate(
+        mainAxisExtent: mainAxisExtent,
+        direction: direction,
+        controller: controller,
+      );
     }
 
     return new ClipRect(
@@ -142,10 +142,10 @@ abstract class ParallaxWithAxisDirectionDelegate extends ParallaxDelegate {
     switch (direction) {
       case AxisDirection.up:
       case AxisDirection.down:
-        return const Offset(0.0, -1.0);
+        return const Offset(0.0, 1.0);
       case AxisDirection.left:
       case AxisDirection.right:
-        return const Offset(-1.0, 0.0);
+        return const Offset(1.0, 0.0);
     }
     return null;
   }
@@ -156,37 +156,35 @@ abstract class ParallaxWithAxisDirectionDelegate extends ParallaxDelegate {
   }
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    final Axis axis = controller.position?.axis;
-    assert(axis != null);
-    return axis == Axis.horizontal ? constraints.heightConstraints() : constraints.widthConstraints();
-  }
-
-  @override
   Offset getPositionForChild(Size size, Size childSize, RenderBox renderBox) {
     final ScrollPosition position = controller.position;
     assert(position != null);
 
-    final AxisDirection parallaxDirection = direction ?? position.axisDirection;
-    assert(parallaxDirection != null);
+    final AxisDirection parallaxDirection = _getParallaxDirection();
+    final Axis parallaxAxis = axisDirectionToAxis(parallaxDirection);
 
     final Offset offsetUnit = _getOffsetUnit(parallaxDirection);
-    final bool isHorizontalAxis = (position.axis == Axis.horizontal);
 
-    final double childExtent = isHorizontalAxis ? childSize.width : childSize.height;
-    final double mainAxisExtent = isHorizontalAxis ? size.width : size.height;
+    final double childExtent = (parallaxAxis == Axis.horizontal) ? childSize.width : childSize.height;
+    final double mainAxisExtent = (parallaxAxis == Axis.horizontal) ? size.width : size.height;
 
     if (mainAxisExtent < childExtent) {
       final double scrollRatio = getChildScrollRatio(offsetUnit, childExtent, renderBox);
       final offset = childExtent - lerpDouble(mainAxisExtent, childExtent, scrollRatio);
 
-      return offsetUnit * offset;
+      return -(offsetUnit * offset);
     } else {
       return Offset.zero;
     }
   }
 
   double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox);
+
+  AxisDirection _getParallaxDirection() {
+    final AxisDirection parallaxDirection = direction ?? controller?.position?.axisDirection;
+    assert(parallaxDirection != null);
+    return parallaxDirection;
+  }
 }
 
 class ParallaxInsideDelegate extends ParallaxWithAxisDirectionDelegate {
@@ -203,6 +201,29 @@ class ParallaxInsideDelegate extends ParallaxWithAxisDirectionDelegate {
   final double mainAxisExtent;
 
   @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    final AxisDirection parallaxDirection = _getParallaxDirection();
+    final Axis parallaxAxis = axisDirectionToAxis(parallaxDirection);
+    final Axis scrollAxis = controller?.position?.axis;
+
+    if (scrollAxis == parallaxAxis) {
+      return scrollAxis == Axis.horizontal ? constraints.heightConstraints() : constraints.widthConstraints();
+    } else {
+      return scrollAxis == Axis.horizontal
+          ? constraints.widthConstraints().tighten(width: mainAxisExtent)
+          : constraints.heightConstraints().tighten(height: mainAxisExtent);
+    }
+  }
+
+//  @override
+//  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+//    final AxisDirection parallaxDirection = _getParallaxDirection();
+//    final Axis parallaxAxis = axisDirectionToAxis(parallaxDirection);
+//
+//    return parallaxAxis == Axis.horizontal ? constraints.heightConstraints() : constraints.widthConstraints();
+//  }
+
+  @override
   Size getSize(BoxConstraints constraints) {
     final ScrollPosition position = controller.position;
     assert(position != null);
@@ -215,13 +236,18 @@ class ParallaxInsideDelegate extends ParallaxWithAxisDirectionDelegate {
   double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox) {
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(renderBox);
     assert(viewport != null);
-    final Offset localPositionOffset = offsetUnit * mainAxisExtent;
+
+    final ScrollPosition position = controller.position;
+    assert(position != null);
+    final bool isHorizontalAxis = (position.axis == Axis.horizontal);
+
+    final Offset localPositionOffset = isHorizontalAxis ? new Offset(mainAxisExtent,0.0) : new Offset(0.0,mainAxisExtent); //offsetUnit * mainAxisExtent;
     final Offset positionInViewport = renderBox.localToGlobal(localPositionOffset, ancestor: viewport);
 
     // One dimension should be 0.0, so this should be ok.
     final double distanceFromLeading = math.max(positionInViewport.dx, positionInViewport.dy);
 
-    double scrollRatio = 1.0 - distanceFromLeading / (controller.position.viewportDimension + mainAxisExtent);
+    double scrollRatio =  1.0 - distanceFromLeading / (controller.position.viewportDimension + mainAxisExtent);
 //    if (followScrollDirection) {
 //      scrollRatio = 1.0 - scrollRatio;
 //    }
@@ -238,6 +264,14 @@ class ParallaxOutsideDelegate extends ParallaxWithAxisDirectionDelegate {
           controller: controller,
           direction: direction,
         );
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    final AxisDirection parallaxDirection = _getParallaxDirection();
+    final Axis parallaxAxis = axisDirectionToAxis(parallaxDirection);
+
+    return parallaxAxis == Axis.horizontal ? constraints.heightConstraints() : constraints.widthConstraints();
+  }
 
   @override
   double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox) {

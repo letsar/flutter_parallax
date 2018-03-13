@@ -109,10 +109,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget buildItem(BuildContext context, int index) {
     if (index != 20) {
-      return new Parallax.inside(
-        child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
-        mainAxisExtent: 150.0,
-      );
+      if (index == 5) {
+        return new Parallax.inside(
+          child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
+          mainAxisExtent: 150.0,
+          direction: AxisDirection.right,
+        );
+      } else {
+        return new Parallax.inside(
+          child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
+          mainAxisExtent: 150.0,
+        );
+      }
     } else {
       return new Parallax.inside(
         child: new Column(
