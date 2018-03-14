@@ -48,58 +48,60 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           new Parallax.outside(
             controller: _scrollController,
-            child: new Column(
-              children: <Widget>[
-                new Container(
-                  color: Colors.red,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.pink,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.lightGreen,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.orange,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.teal,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.purple,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.grey,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.lime,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.indigo,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.yellow,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.green,
-                  height: 200.0,
-                ),
-                new Container(
-                  color: Colors.blue,
-                  height: 200.0,
-                ),
-              ],
-            ),
+            direction: AxisDirection.right,
+            child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
+//            child: new Column(
+//              children: <Widget>[
+//                new Container(
+//                  color: Colors.red,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.pink,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.lightGreen,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.orange,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.teal,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.purple,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.grey,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.lime,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.indigo,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.yellow,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.green,
+//                  height: 200.0,
+//                ),
+//                new Container(
+//                  color: Colors.blue,
+//                  height: 200.0,
+//                ),
+//              ],
+//            ),
           ),
           listView,
         ],
@@ -114,6 +116,18 @@ class _MyHomePageState extends State<MyHomePage> {
           child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
           mainAxisExtent: 150.0,
           direction: AxisDirection.right,
+        );
+      } else if (index == 6) {
+        return new Parallax.inside(
+          child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
+          mainAxisExtent: 150.0,
+          direction: AxisDirection.left,
+        );
+      } else if (index == 7) {
+        return new Parallax.inside(
+          child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
+          mainAxisExtent: 150.0,
+          flipDirection: true,
         );
       } else {
         return new Parallax.inside(
