@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Flutter Demo Home Page'),
+      home: new MyHomePage(title: 'Parallax demo'),
     );
   }
 }
@@ -31,143 +31,106 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-
     _scrollController = new ScrollController();
   }
 
   @override
   Widget build(BuildContext context) {
-    final ListView listView = new ListView.builder(
-      controller: _scrollController,
-      itemBuilder: buildItem,
-      itemCount: 12,
-    );
-
     return new Scaffold(
+      appBar: new AppBar(title: new Text(widget.title)),
       body: new Stack(
         children: <Widget>[
           new Parallax.outside(
             controller: _scrollController,
-            direction: AxisDirection.right,
-            child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
-//            child: new Column(
-//              children: <Widget>[
-//                new Container(
-//                  color: Colors.red,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.pink,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.lightGreen,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.orange,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.teal,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.purple,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.grey,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.lime,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.indigo,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.yellow,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.green,
-//                  height: 200.0,
-//                ),
-//                new Container(
-//                  color: Colors.blue,
-//                  height: 200.0,
-//                ),
-//              ],
-//            ),
+            child: new Column(
+              children: <Widget>[
+                new Container(
+                  color: Colors.red,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.pink,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.lightGreen,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.orange,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.teal,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.purple,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.grey,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.lime,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.indigo,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.yellow,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.green,
+                  height: 200.0,
+                ),
+                new Container(
+                  color: Colors.blue,
+                  height: 200.0,
+                ),
+              ],
+            ),
           ),
-          listView,
+          new ListView.builder(
+            controller: _scrollController,
+            itemBuilder: buildItem,
+            itemCount: 20,
+          ),
         ],
       ),
     );
   }
 
   Widget buildItem(BuildContext context, int index) {
-    if (index != 20) {
-      if (index == 5) {
+    var mode = index % 4;
+    switch (mode) {
+      case 0:
+        return new Parallax.inside(
+          child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
+          mainAxisExtent: 150.0,
+        );
+      case 1:
         return new Parallax.inside(
           child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
           mainAxisExtent: 150.0,
           direction: AxisDirection.right,
         );
-      } else if (index == 6) {
-        return new Parallax.inside(
-          child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
-          mainAxisExtent: 150.0,
-          direction: AxisDirection.left,
-        );
-      } else if (index == 7) {
+      case 2:
         return new Parallax.inside(
           child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
           mainAxisExtent: 150.0,
           flipDirection: true,
         );
-      } else {
+      default:
         return new Parallax.inside(
-          child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
+          child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
           mainAxisExtent: 150.0,
+          direction: AxisDirection.left,
         );
-      }
-    } else {
-      return new Parallax.inside(
-        child: new Column(
-          children: <Widget>[
-            new Container(
-              color: Colors.red,
-              height: 173.0,
-            ),
-            new Container(
-              color: Colors.green,
-              height: 173.0,
-              child: new FlatButton(
-                  onPressed: () => showDialog(
-                        context: context,
-                        child: new AlertDialog(
-                          title: new Text('hé'),
-                          content: new Text('lo'),
-                        ),
-                      ),
-                  child: new Text('Button')),
-            ),
-            new Container(
-              color: Colors.blue,
-              height: 173.0,
-            ),
-            new Container(
-              color: Colors.pink,
-              height: 173.0,
-            ),
-          ],
-        ),
-        mainAxisExtent: 346.0,
-      );
     }
   }
 }

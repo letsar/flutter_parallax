@@ -146,7 +146,7 @@ abstract class ParallaxWithAxisDirectionDelegate extends ParallaxDelegate {
 
     if (mainAxisExtent < childExtent) {
       double scrollRatio = getChildScrollRatio(offsetUnit, childExtent, renderBox);
-      if (parallaxDirection == AxisDirection.down || parallaxDirection == AxisDirection.left) {
+      if (parallaxDirection == AxisDirection.down || parallaxDirection == AxisDirection.right) {
         scrollRatio = 1.0 - scrollRatio;
       }
 
