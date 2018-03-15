@@ -11,6 +11,8 @@ A Flutter widget that moves according to a scroll controller.
 * Customizable parallax delegate.
 * For widgets inside **and** outside a scroll view (list items and list backgrounds for example). 
 
+![Screenshot](https://raw.githubusercontent.com/letsar/flutter_parallax/master/doc/images/parallax.gif)
+
 ## Getting started
 
 In the `pubspec.yaml` of your flutter project, add the following dependency:
@@ -31,7 +33,23 @@ For help getting started with Flutter, view the online [documentation](https://f
 
 ## Example
 
+```dart
+new Parallax.inside(
+    child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
+    mainAxisExtent: 150.0,
+);
+```
+
+You can find more examples in the [Example](https://github.com/letsar/flutter_parallax/tree/master/example) project.
+
 ## Constructors
+
+* The `Parallax.inside`, that computes the parallax offset from its position in its first `Scrollable` parent.
+Useful for list or grid items.
+* The `Parallax.outside`, that computes the parallax offset from the percentage of the scrollable's container extent.
+Useful for a list or grid background.
+* The `Parallax.custom` takes a `ParallaxDelegate`, which provides the ability to customize additional aspects of the child model. For example, a `ParallaxDelegate`
+can control the algorithm used to computes the parallax offset of the child within its parent.
 
 ## Changelog
 
