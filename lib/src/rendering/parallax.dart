@@ -48,7 +48,8 @@ abstract class ParallaxDelegate {
   /// these constraints.
   ///
   /// Defaults to the given constraints.
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints;
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      constraints;
 
   /// The position where the child should be placed.
   ///
@@ -59,7 +60,8 @@ abstract class ParallaxDelegate {
   /// [getConstraintsForChild].
   ///
   /// Defaults to positioning the child in the upper left corner of the parent.
-  Offset getPositionForChild(Size size, Size childSize, RenderBox renderBox) => Offset.zero;
+  Offset getPositionForChild(Size size, Size childSize, RenderBox renderBox) =>
+      Offset.zero;
 
   /// Called whenever a new instance of the custom layout delegate class is
   /// provided to the [RenderParallaxSingleChildLayoutBox] object, or any time
@@ -128,7 +130,8 @@ abstract class ParallaxWithAxisDirectionDelegate extends ParallaxDelegate {
 
   @override
   bool shouldRelayout(ParallaxWithAxisDirectionDelegate oldDelegate) {
-    return super.shouldRelayout(oldDelegate) || direction != oldDelegate.direction;
+    return super.shouldRelayout(oldDelegate) ||
+        direction != oldDelegate.direction;
   }
 
   @override
@@ -141,16 +144,21 @@ abstract class ParallaxWithAxisDirectionDelegate extends ParallaxDelegate {
 
     final Offset offsetUnit = _getOffsetUnit(parallaxDirection);
 
-    final double childExtent = (parallaxAxis == Axis.horizontal) ? childSize.width : childSize.height;
-    final double mainAxisExtent = (parallaxAxis == Axis.horizontal) ? size.width : size.height;
+    final double childExtent =
+        (parallaxAxis == Axis.horizontal) ? childSize.width : childSize.height;
+    final double mainAxisExtent =
+        (parallaxAxis == Axis.horizontal) ? size.width : size.height;
 
     if (mainAxisExtent < childExtent) {
-      double scrollRatio = getChildScrollRatio(offsetUnit, childExtent, renderBox);
-      if (parallaxDirection == AxisDirection.down || parallaxDirection == AxisDirection.right) {
+      double scrollRatio =
+          getChildScrollRatio(offsetUnit, childExtent, renderBox);
+      if (parallaxDirection == AxisDirection.down ||
+          parallaxDirection == AxisDirection.right) {
         scrollRatio = 1.0 - scrollRatio;
       }
 
-      final offset = childExtent - lerpDouble(mainAxisExtent, childExtent, scrollRatio);
+      final offset =
+          childExtent - lerpDouble(mainAxisExtent, childExtent, scrollRatio);
 
       return -(offsetUnit * offset);
     } else {
@@ -158,10 +166,12 @@ abstract class ParallaxWithAxisDirectionDelegate extends ParallaxDelegate {
     }
   }
 
-  double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox);
+  double getChildScrollRatio(
+      Offset offsetUnit, double childExtent, RenderBox renderBox);
 
   AxisDirection _getParallaxDirection() {
-    AxisDirection parallaxDirection = direction ?? controller?.position?.axisDirection;
+    AxisDirection parallaxDirection =
+        direction ?? controller?.position?.axisDirection;
     if (flipDirection) {
       parallaxDirection = flipAxisDirection(parallaxDirection);
     }
@@ -201,7 +211,9 @@ class ParallaxInsideDelegate extends ParallaxWithAxisDirectionDelegate {
     final Axis scrollAxis = controller?.position?.axis;
 
     if (scrollAxis == parallaxAxis) {
-      return scrollAxis == Axis.horizontal ? constraints.heightConstraints() : constraints.widthConstraints();
+      return scrollAxis == Axis.horizontal
+          ? constraints.heightConstraints()
+          : constraints.widthConstraints();
     } else {
       return scrollAxis == Axis.horizontal
           ? constraints.widthConstraints().tighten(width: mainAxisExtent)
@@ -215,25 +227,34 @@ class ParallaxInsideDelegate extends ParallaxWithAxisDirectionDelegate {
     assert(position != null);
     final bool isHorizontalAxis = (position.axis == Axis.horizontal);
 
-    return constraints.constrain(new Size(isHorizontalAxis ? mainAxisExtent : constraints.maxWidth, isHorizontalAxis ? constraints.maxHeight : mainAxisExtent));
+    return constraints.constrain(new Size(
+        isHorizontalAxis ? mainAxisExtent : constraints.maxWidth,
+        isHorizontalAxis ? constraints.maxHeight : mainAxisExtent));
   }
 
   @override
-  double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox) {
-    final RenderAbstractViewport viewport = RenderAbstractViewport.of(renderBox);
+  double getChildScrollRatio(
+      Offset offsetUnit, double childExtent, RenderBox renderBox) {
+    final RenderAbstractViewport viewport =
+        RenderAbstractViewport.of(renderBox);
     assert(viewport != null);
 
     final ScrollPosition position = controller.position;
     assert(position != null);
     final bool isHorizontalAxis = (position.axis == Axis.horizontal);
 
-    final Offset localPositionOffset = isHorizontalAxis ? new Offset(mainAxisExtent, 0.0) : new Offset(0.0, mainAxisExtent); //offsetUnit * mainAxisExtent;
-    final Offset positionInViewport = renderBox.localToGlobal(localPositionOffset, ancestor: viewport);
+    final Offset localPositionOffset = isHorizontalAxis
+        ? new Offset(mainAxisExtent, 0.0)
+        : new Offset(0.0, mainAxisExtent); //offsetUnit * mainAxisExtent;
+    final Offset positionInViewport =
+        renderBox.localToGlobal(localPositionOffset, ancestor: viewport);
 
     // One dimension should be 0.0, so this should be ok.
-    final double distanceFromLeading = math.max(positionInViewport.dx, positionInViewport.dy);
+    final double distanceFromLeading =
+        math.max(positionInViewport.dx, positionInViewport.dy);
 
-    double scrollRatio = distanceFromLeading / (controller.position.viewportDimension + mainAxisExtent);
+    double scrollRatio = distanceFromLeading /
+        (controller.position.viewportDimension + mainAxisExtent);
     return scrollRatio;
   }
 }
@@ -259,19 +280,24 @@ class ParallaxOutsideDelegate extends ParallaxWithAxisDirectionDelegate {
     final AxisDirection parallaxDirection = _getParallaxDirection();
     final Axis parallaxAxis = axisDirectionToAxis(parallaxDirection);
 
-    return parallaxAxis == Axis.horizontal ? constraints.heightConstraints() : constraints.widthConstraints();
+    return parallaxAxis == Axis.horizontal
+        ? constraints.heightConstraints()
+        : constraints.widthConstraints();
   }
 
   @override
-  double getChildScrollRatio(Offset offsetUnit, double childExtent, RenderBox renderBox) {
+  double getChildScrollRatio(
+      Offset offsetUnit, double childExtent, RenderBox renderBox) {
     double scrollRatio = 0.0;
     final ScrollPosition position = controller.position;
     final double offset = controller.offset;
-    final double minScrollExtent = position?.minScrollExtent ?? double.negativeInfinity;
+    final double minScrollExtent =
+        position?.minScrollExtent ?? double.negativeInfinity;
     final double maxScrollExtent = position?.maxScrollExtent ?? double.infinity;
 
     if (minScrollExtent.isFinite && maxScrollExtent.isFinite) {
-      scrollRatio = (offset - minScrollExtent) / (maxScrollExtent - minScrollExtent);
+      scrollRatio =
+          (offset - minScrollExtent) / (maxScrollExtent - minScrollExtent);
     }
     return scrollRatio;
   }
@@ -303,7 +329,8 @@ class RenderParallaxSingleChildLayoutBox extends RenderShiftedBox {
       return;
     }
     final ParallaxDelegate oldDelegate = _delegate;
-    if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate)) {
+    if (newDelegate.runtimeType != oldDelegate.runtimeType ||
+        newDelegate.shouldRelayout(oldDelegate)) {
       markNeedsLayout();
     }
     _delegate = newDelegate;
@@ -333,11 +360,15 @@ class RenderParallaxSingleChildLayoutBox extends RenderShiftedBox {
   void performLayout() {
     size = _getSize(constraints);
     if (child != null) {
-      final BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
+      final BoxConstraints childConstraints =
+          delegate.getConstraintsForChild(constraints);
       assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
       child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
       final BoxParentData childParentData = child.parentData;
-      childParentData.offset = delegate.getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child.size, this);
+      childParentData.offset = delegate.getPositionForChild(
+          size,
+          childConstraints.isTight ? childConstraints.smallest : child.size,
+          this);
     }
   }
 }

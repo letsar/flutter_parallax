@@ -110,24 +110,28 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (mode) {
       case 0:
         return new Parallax.inside(
-          child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
+          child: new Image.network(
+              'https://flutter.io/images/homepage/header-illustration.png'),
           mainAxisExtent: 150.0,
         );
       case 1:
         return new Parallax.inside(
-          child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
+          child: new Image.network(
+              'http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
           mainAxisExtent: 150.0,
           direction: AxisDirection.right,
         );
       case 2:
         return new Parallax.inside(
-          child: new Image.network('https://flutter.io/images/homepage/header-illustration.png'),
+          child: new Image.network(
+              'https://flutter.io/images/homepage/header-illustration.png'),
           mainAxisExtent: 150.0,
           flipDirection: true,
         );
       default:
         return new Parallax.inside(
-          child: new Image.network('http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
+          child: new Image.network(
+              'http://t.wallpaperweb.org/wallpaper/nature/3840x1024/9XMedia1280TripleHorizontalMountainsclouds.jpg'),
           mainAxisExtent: 150.0,
           direction: AxisDirection.left,
         );

@@ -1,6 +1,6 @@
 name: flutter_parallax
 description: A Flutter widget that moves according to a scroll controller.
-version: 0.1.1
+version: 0.1.2
 author: Romain Rastel <lets4r@gmail.com>
 homepage: https://github.com/letsar/flutter_parallax
 
@@ -14,4 +14,4 @@ dev_dependencies:
     sdk: flutter
 
 environment:
-  sdk: ">=1.19.0 <2.0.0"
+  sdk: ">=1.19.0 <3.0.0"

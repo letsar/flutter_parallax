@@ -50,9 +50,11 @@ class Parallax extends StatelessWidget {
     this.flipDirection = false,
   })  : assert(controller != null),
         mainAxisExtent = null,
-        delegate = new ParallaxOutsideDelegate(controller: controller, direction: direction, flipDirection: flipDirection),
+        delegate = new ParallaxOutsideDelegate(
+            controller: controller,
+            direction: direction,
+            flipDirection: flipDirection),
         super(key: key);
-
 
   /// Creates a parallax widget with a custom parallax layout.
   ///
@@ -140,7 +142,8 @@ class ParallaxSingleChildLayout extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderParallaxSingleChildLayoutBox renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderParallaxSingleChildLayoutBox renderObject) {
     renderObject.delegate = delegate;
   }
 }
